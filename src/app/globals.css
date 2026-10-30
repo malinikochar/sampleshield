@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+:root {
+  --ss-porcelain: #F7FAFC;
+  --ss-surface: #FFFFFF;
+  --ss-ink: #142437;
+  --ss-navy: #183B56;
+  --ss-teal: #0E9488;
+  --ss-teal-hover: #0B7A70;
+  --ss-teal-pale: #E5F7F3;
+  --ss-amber: #E8A23C;
+  --ss-danger: #D85A56;
+  --ss-muted: #64748B;
+}
+
+@layer base {
+  html {
+    background-color: var(--ss-porcelain);
+    color: var(--ss-ink);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    background-color: var(--ss-porcelain);
+    color: var(--ss-ink);
+    min-height: 100dvh;
+  }
+
+  *:focus-visible {
+    outline: 2px solid var(--ss-teal);
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media print {
+  body {
+    background: #FFFFFF !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only-passport {
+    border: 2px solid #142437 !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+}
