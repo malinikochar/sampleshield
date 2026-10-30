@@ -1,0 +1,68 @@
+name: SampleShield CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Lint, Typecheck, Unit Tests & Build
+    runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://placeholder-ci.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder_key
+      NEXT_PUBLIC_APP_ENV: test
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Run TypeScript strict typecheck
+        run: npm run typecheck
+
+      - name: Run Vitest unit & domain rules suite
+        run: npm run test
+
+      - name: Build Next.js production bundle
+        run: npm run build
+
+      - name: Verify no privileged secret leakage in build output
+        run: |
+          if grep -R -E "SUPABASE_SERVICE_ROLE_KEY|sb_secret_[A-Za-z0-9_-]{16,}" .next/static 2>/dev/null; then
+            echo "Privileged secret detected in client bundle!"
+            exit 1
+          fi
+
+  database-rls:
+    name: Supabase Migrations & pgTAP RLS Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start local Supabase stack (Auth + Postgres + PostgREST)
+        run: supabase start -x realtime,storage-api,imgproxy,mailpit,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+
+      - name: Execute pgTAP security & RLS tests
+        run: supabase test db
